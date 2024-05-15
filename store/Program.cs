@@ -22,6 +22,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Register Service injection de dependance
 builder.Services.AddScoped<IProduitService, ProduitService>();
 builder.Services.AddScoped<IClientservice, ClientService>();
+builder.Services.AddScoped<IAtt_ProduitService, Att_ProduitService>();
+builder.Services.AddScoped<IPhotoProduitService, PhotoProduitService>();
 
 
 

@@ -23,25 +23,53 @@ namespace store.Services.Implementation
 
         public async Task DeleteProduct(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            var product = await _context.Products
+              .Include(p => p.PPs)
+              .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product != null)
+            {
+                
+                _context.photoProduits.RemoveRange(product.PPs);
+
+                _context.Products.Remove(product);
+
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<IEnumerable<Product>> GetAllProducts()
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products.Include(p => p.PPs).ToListAsync();
         }
 
         public async Task<Product?> GetProductById(int id)
         {
-            return await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Products.Include(p => p.PPs).FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public Task UpdateProduct(int id, Product newProduct)
+        public async Task UpdateProduct(int id, Product newProduct)
         {
-            ///
-            throw new NotImplementedException();
+            var existingProduct = await _context.Products.Include(p => p.PPs).FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingProduct == null)
+            {
+                throw new KeyNotFoundException("Product not found");
+            }
+
+            
+            existingProduct.Name = newProduct.Name;
+            existingProduct.Description = newProduct.Description;
+            existingProduct.QteStock = newProduct.QteStock;
+            existingProduct.Prix = newProduct.Prix;
+
+            
+            _context.photoProduits.RemoveRange(existingProduct.PPs);
+            existingProduct.PPs = newProduct.PPs;
+
+           
+            await _context.SaveChangesAsync();
+
         }
     }
 }
